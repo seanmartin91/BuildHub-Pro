@@ -81,12 +81,23 @@
 
 /* TOPBAR */
 .topbar {
-  height: 60px; background: var(--surface); border-bottom: 1px solid var(--border);
+  height: 68px; background: var(--surface); border-bottom: 1px solid var(--border);
   display: flex; align-items: center; padding: 0 24px; gap: 16px; flex-shrink: 0;
 }
-.topbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; }
-.topbar-subtitle { color: var(--text3); font-size: 13px; }
-.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.topbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1.5px; }
+.topbar-subtitle { color: var(--text3); font-size: 12px; margin-top: 1px; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.topbar-notif {
+  width: 36px; height: 36px; background: transparent; border: 1px solid var(--border);
+  border-radius: 9px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text2); position: relative; transition: all 0.15s;
+}
+.topbar-notif:hover { background: var(--surface2); color: var(--text); }
+.notif-dot {
+  position: absolute; top: 7px; right: 7px; width: 7px; height: 7px;
+  background: var(--accent); border-radius: 50%; border: 1.5px solid var(--surface);
+}
+.topbar-divider { width: 1px; height: 26px; background: var(--border); margin: 0 2px; }
 .btn {
   display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px;
   font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s;
@@ -428,6 +439,63 @@ tr:hover td { background: var(--surface2); color: var(--text); }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes typingBounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
+
+/* ===== DASHBOARD UPGRADES ===== */
+.kpi-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 20px 22px; position: relative; overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { border-color: rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+.kpi-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.kpi-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.kpi-icon.orange { background: rgba(245,166,35,0.15); }
+.kpi-icon.blue { background: rgba(74,158,255,0.15); }
+.kpi-icon.green { background: rgba(62,207,142,0.15); }
+.kpi-icon.red { background: rgba(255,77,109,0.15); }
+.kpi-chip { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+.kpi-chip.up { background: rgba(62,207,142,0.12); color: var(--green); }
+.kpi-chip.neutral { background: rgba(245,166,35,0.12); color: var(--accent); }
+.kpi-value { font-family: 'Bebas Neue', sans-serif; font-size: 40px; line-height: 1; letter-spacing: 0.5px; }
+.kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.4px; font-weight: 600; margin-top: 3px; }
+.kpi-sparkline { margin-top: 14px; opacity: 0.85; }
+
+.weather-widget-pro {
+  background: linear-gradient(135deg, #0f1f3d 0%, #1a2a4a 50%, #0d1828 100%);
+  border: 1px solid rgba(74,158,255,0.2); border-radius: 14px; padding: 18px 20px;
+}
+.weather-icon-pro { font-size: 42px; filter: drop-shadow(0 2px 8px rgba(74,158,255,0.3)); }
+.weather-temp-pro { font-family: 'Bebas Neue', sans-serif; font-size: 36px; line-height: 1; }
+.weather-cond { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.weather-badge { margin-left: auto; background: rgba(62,207,142,0.15); color: var(--green); font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(62,207,142,0.2); white-space: nowrap; }
+.weather-stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 14px; }
+.weather-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 6px; text-align: center; }
+.weather-stat .ws-icon { font-size: 14px; display: block; margin-bottom: 2px; }
+.weather-stat .ws-val { font-size: 12px; font-weight: 600; color: var(--text); display: block; }
+.weather-stat .ws-lbl { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+.budget-ring-wrap { display: flex; align-items: center; gap: 16px; }
+.budget-ring-labels { flex: 1; }
+.budget-ring-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; color: var(--text2); }
+.budget-ring-row:last-child { margin-bottom: 0; }
+.budget-ring-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+.act-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.act-row:last-child { border-bottom: none; }
+.act-icon-wrap { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.act-text { flex: 1; font-size: 13px; color: var(--text2); line-height: 1.4; }
+.act-time { font-size: 10px; color: var(--text3); white-space: nowrap; font-family: 'JetBrains Mono', monospace; }
+
+.dash-proj-row { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: opacity 0.15s; }
+.dash-proj-row:last-child { border-bottom: none; }
+.dash-proj-row:hover { opacity: 0.8; }
+.dash-proj-emoji { font-size: 22px; width: 42px; height: 42px; background: var(--surface2); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dash-proj-info { flex: 1; min-width: 0; }
+.dash-proj-name { font-weight: 600; font-size: 14px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-proj-bar { height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+.dash-proj-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+.dash-proj-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); }
+.dash-proj-pct { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; flex-shrink: 0; padding-left: 10px; }
 </style>
 
 </head>
@@ -469,6 +537,11 @@ tr:hover td { background: var(--surface2); color: var(--text); }
       </div>
       <div class="topbar-right">
         <div id="active-project-label" class="tag tag-orange" style="display:none">📍 Site A</div>
+        <button class="topbar-notif" onclick="showSnackbar('🔔 No new notifications')" title="Notifications">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="topbar-divider"></div>
         <button class="btn btn-ghost" onclick="toggleAgent()">🤖 AI Agent</button>
         <button class="btn btn-primary" onclick="openNewProjectModal()">+ New Project</button>
       </div>
@@ -477,41 +550,71 @@ tr:hover td { background: var(--surface2); color: var(--text); }
     <div class="content">
       <!-- DASHBOARD PAGE -->
       <div class="page active" id="page-dashboard">
-        <div class="grid-4" style="margin-bottom:20px">
-          <div class="stat-card orange"><div class="stat-icon">🏗️</div><div class="stat-value">3</div><div class="stat-label">Active Projects</div><div class="stat-change">↑ 1 this month</div></div>
-          <div class="stat-card blue"><div class="stat-icon">📸</div><div class="stat-value" id="total-files">12</div><div class="stat-label">Files Uploaded</div><div class="stat-change">↑ 5 this week</div></div>
-          <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-value">68%</div><div class="stat-label">Avg. Completion</div><div class="stat-change">↑ 4% this week</div></div>
-          <div class="stat-card red"><div class="stat-icon">💷</div><div class="stat-value">£2.1M</div><div class="stat-label">Total Budget</div><div class="stat-change">£420k spent</div></div>
-        </div>
 
-        <div class="grid-2" style="margin-bottom:20px">
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-              <div style="font-weight:600">Active Projects</div>
-              <button class="btn btn-ghost" style="font-size:12px;padding:5px 10px" onclick="showPage('projects',null)">View All →</button>
-            </div>
-            <div id="dashboard-projects"></div>
-          </div>
-          <div>
-            <div style="font-weight:600;margin-bottom:12px">Site Conditions</div>
-            <div class="weather-widget" style="margin-bottom:12px">
-              <div class="weather-icon">⛅</div>
-              <div class="weather-info">
-                <div class="weather-temp">14°C</div>
-                <div class="weather-desc">Partly cloudy — OK to pour concrete</div>
-                <div class="weather-extra">Wind: 12 km/h · Humidity: 62%</div>
+        <!-- KPI ROW -->
+        <div class="grid-4" style="margin-bottom:22px" id="kpi-row"></div>
+
+        <!-- MAIN GRID -->
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:18px">
+
+          <!-- LEFT: Projects + Activity -->
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Active Projects</div>
+                <button class="btn btn-ghost" style="font-size:12px;padding:5px 12px" onclick="showPage('projects',null)">View All →</button>
               </div>
+              <div id="dashboard-projects"></div>
             </div>
             <div class="card">
-              <div class="card-header"><div class="card-title">Today's Tasks</div><span class="tag tag-orange">4 pending</span></div>
-              <div id="dashboard-tasks"></div>
+              <div class="card-header">
+                <div class="card-title">Recent Activity</div>
+                <span class="tag tag-blue" style="font-size:10px;padding:2px 8px">● Live</span>
+              </div>
+              <div id="activity-feed"></div>
             </div>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="card-header"><div class="card-title">Recent Activity</div></div>
-          <div id="activity-feed"></div>
+          <!-- RIGHT: Weather + Budget + Tasks -->
+          <div style="display:flex;flex-direction:column;gap:18px">
+
+            <!-- Weather -->
+            <div class="weather-widget-pro">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:0">
+                <div class="weather-icon-pro">⛅</div>
+                <div>
+                  <div class="weather-temp-pro">14°C</div>
+                  <div class="weather-cond">Partly Cloudy · Manchester</div>
+                </div>
+                <div class="weather-badge">✅ Safe to pour</div>
+              </div>
+              <div class="weather-stats-row">
+                <div class="weather-stat"><span class="ws-icon">💨</span><span class="ws-val">12 km/h</span><div class="ws-lbl">Wind</div></div>
+                <div class="weather-stat"><span class="ws-icon">💧</span><span class="ws-val">62%</span><div class="ws-lbl">Humidity</div></div>
+                <div class="weather-stat"><span class="ws-icon">👁</span><span class="ws-val">10 km</span><div class="ws-lbl">Visibility</div></div>
+                <div class="weather-stat"><span class="ws-icon">🌅</span><span class="ws-val">05:42</span><div class="ws-lbl">Sunrise</div></div>
+              </div>
+            </div>
+
+            <!-- Budget Ring -->
+            <div class="card" style="padding:18px">
+              <div class="card-header" style="margin-bottom:14px">
+                <div class="card-title">Budget Overview</div>
+                <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="showPage('budget',null)">Details →</button>
+              </div>
+              <div id="budget-ring"></div>
+            </div>
+
+            <!-- Tasks -->
+            <div class="card" style="padding:18px">
+              <div class="card-header" style="margin-bottom:10px">
+                <div class="card-title">Today's Tasks</div>
+                <span class="tag tag-orange" id="tasks-pending-count">4 pending</span>
+              </div>
+              <div id="dashboard-tasks"></div>
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -939,36 +1042,124 @@ function toggleSidebar() {
 }
 
 // ===== DASHBOARD =====
+function sparklineSVG(data, color, w=90, h=36) {
+  const max = Math.max(...data), min = Math.min(...data), range = max - min || 1;
+  const pts = data.map((v,i) => `${(i/(data.length-1))*w},${h-2-((v-min)/range)*(h-8)}`).join(' ');
+  const apts = `0,${h} ` + pts + ` ${w},${h}`;
+  const gid = 'sg' + Math.random().toString(36).slice(2,7);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <polygon points="${apts}" fill="url(#${gid})"/>
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function budgetRingSVG(pct, size=100) {
+  const r = 36, circ = 2*Math.PI*r, dash = (pct/100)*circ;
+  const warn = pct > 80;
+  const color = warn ? 'var(--accent)' : 'var(--green)';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="10"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="10"
+      stroke-dasharray="${dash} ${circ}" stroke-linecap="round"
+      transform="rotate(-90 ${size/2} ${size/2})" style="transition:stroke-dasharray 1s ease"/>
+    <text x="${size/2}" y="${size/2-5}" text-anchor="middle" fill="var(--text)"
+      font-family="'Bebas Neue',sans-serif" font-size="20">${pct}%</text>
+    <text x="${size/2}" y="${size/2+11}" text-anchor="middle" fill="var(--text3)"
+      font-size="9" font-family="'DM Sans',sans-serif" font-weight="600" letter-spacing="1">SPENT</text>
+  </svg>`;
+}
+
 function renderDashboard() {
-  const dp = document.getElementById('dashboard-projects');
-  dp.innerHTML = projects.slice(0,2).map(p => `
-    <div class="project-card" onclick="showPage('projects',null)" style="margin-bottom:10px;display:flex;align-items:center;gap:12px;padding:14px">
-      <div style="font-size:28px">${p.emoji}</div>
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:14px;margin-bottom:4px">${p.name}</div>
-        <div class="progress-bar"><div class="progress-fill ${p.color}" style="width:${p.progress}%"></div></div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px"><span>${p.location}</span><span>${p.progress}%</span></div>
+  // KPI cards with sparklines
+  const kpis = [
+    { label:'Active Projects', value: projects.filter(p=>p.status==='active').length, icon:'🏛️', cls:'orange', hex:'#f5a623', chip:'↑ 1 this month', chipCls:'up', spark:[1,1,2,2,2,3,3] },
+    { label:'Files Uploaded', value: files.length, icon:'📁', cls:'blue', hex:'#4a9eff', chip:'↑ 5 this week', chipCls:'up', spark:[5,6,6,7,8,10,files.length] },
+    { label:'Avg. Completion', value:'68%', icon:'✅', cls:'green', hex:'#3ecf8e', chip:'↑ 4% this week', chipCls:'up', spark:[52,56,58,61,63,65,68] },
+    { label:'Total Budget', value:'£2.1M', icon:'💷', cls:'red', hex:'#ff4d6d', chip:'20% utilised', chipCls:'neutral', spark:[0,50,120,200,280,380,420] },
+  ];
+  const kpiEl = document.getElementById('kpi-row');
+  if (kpiEl) kpiEl.innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-icon ${k.cls}">${k.icon}</div>
+        <div class="kpi-chip ${k.chipCls}">${k.chip}</div>
       </div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-sparkline">${sparklineSVG(k.spark, k.hex)}</div>
     </div>
   `).join('');
 
+  // Project rows
+  const colorHex = { orange:'#f5a623', blue:'#4a9eff', green:'#3ecf8e' };
+  const dp = document.getElementById('dashboard-projects');
+  if (dp) dp.innerHTML = projects.map(p => `
+    <div class="dash-proj-row" onclick="selectProject(${p.id})">
+      <div class="dash-proj-emoji">${p.emoji}</div>
+      <div class="dash-proj-info">
+        <div class="dash-proj-name">${p.name}</div>
+        <div class="dash-proj-bar"><div class="dash-proj-fill" style="width:${p.progress}%;background:${colorHex[p.color]||'var(--accent)'}"></div></div>
+        <div class="dash-proj-meta"><span>📍 ${p.location} · ${p.type}</span><span>${p.files} files · ${p.budget}</span></div>
+      </div>
+      <div class="dash-proj-pct" style="color:${colorHex[p.color]||'var(--accent)'}">${p.progress}%</div>
+    </div>
+  `).join('');
+
+  // Budget ring
+  const totalBudget = budgetItems.reduce((a,b)=>a+b.budget,0);
+  const totalSpent  = budgetItems.reduce((a,b)=>a+b.spent,0);
+  const pct = Math.round(totalSpent/totalBudget*100);
+  const ringEl = document.getElementById('budget-ring');
+  if (ringEl) ringEl.innerHTML = `
+    <div class="budget-ring-wrap">
+      ${budgetRingSVG(pct)}
+      <div class="budget-ring-labels">
+        <div class="budget-ring-row">
+          <span><span class="budget-ring-dot" style="background:var(--accent)"></span>Spent</span>
+          <span style="font-weight:600;color:var(--text)">£${(totalSpent/1000).toFixed(0)}k</span>
+        </div>
+        <div class="budget-ring-row">
+          <span><span class="budget-ring-dot" style="background:var(--surface3);border:1px solid var(--border)"></span>Remaining</span>
+          <span style="font-weight:600;color:var(--green)">£${((totalBudget-totalSpent)/1000).toFixed(0)}k</span>
+        </div>
+        <div class="budget-ring-row" style="padding-top:8px;border-top:1px solid var(--border);margin-top:4px">
+          <span style="color:var(--text3)">Total</span>
+          <span style="font-weight:700;color:var(--text)">£${(totalBudget/1000000).toFixed(1)}M</span>
+        </div>
+      </div>
+    </div>`;
+
+  // Tasks
+  const pending = checklistItems.filter(c => !c.done);
+  const pendingEl = document.getElementById('tasks-pending-count');
+  if (pendingEl) pendingEl.textContent = pending.length + ' pending';
   const dt = document.getElementById('dashboard-tasks');
-  const todayTasks = checklistItems.filter(c => !c.done).slice(0,4);
-  dt.innerHTML = todayTasks.map(t => `
-    <div class="checklist-item" onclick="toggleCheck(${t.id})">
-      <div class="checkbox ${t.done?'checked':''}">${t.done?'✓':''}</div>
-      <div class="checklist-text ${t.done?'done':''}" style="font-size:13px">${t.text}</div>
+  if (dt) dt.innerHTML = pending.slice(0,4).map(t => `
+    <div class="checklist-item" onclick="toggleCheck(${t.id})" style="padding:9px 0">
+      <div class="checkbox">${t.done?'✓':''}</div>
+      <div class="checklist-text" style="font-size:13px">${t.text}</div>
       <span class="tag tag-${t.priority==='high'?'red':t.priority==='medium'?'orange':'blue'}" style="font-size:10px">${t.priority}</span>
     </div>
   `).join('');
 
-  document.getElementById('activity-feed').innerHTML = activities.map(a => `
-    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:18px;width:28px;text-align:center">${a.icon}</div>
-      <div style="flex:1;font-size:13px;color:var(--text2)">${a.text}</div>
-      <div style="font-size:11px;color:var(--text3);white-space:nowrap">${a.time}</div>
+  // Activity feed
+  const actBg = ['rgba(74,158,255,0.14)','rgba(62,207,142,0.14)','rgba(255,77,109,0.14)','rgba(74,158,255,0.14)','rgba(245,166,35,0.14)','rgba(62,207,142,0.14)'];
+  const af = document.getElementById('activity-feed');
+  if (af) af.innerHTML = activities.map((a,i) => `
+    <div class="act-row">
+      <div class="act-icon-wrap" style="background:${actBg[i%actBg.length]}">${a.icon}</div>
+      <div class="act-text">${a.text}</div>
+      <div class="act-time">${a.time}</div>
     </div>
   `).join('');
+
+  // Update files count for stat card (kept for other pages)
+  const tf = document.getElementById('total-files');
+  if (tf) tf.textContent = files.length;
 }
 
 // ===== PROJECTS =====
