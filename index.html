@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BuildHub Pro — Construction Project Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #151820;
+    --surface2: #1c2030;
+    --surface3: #232838;
+    --border: #2a3045;
+    --accent: #f5a623;
+    --accent2: #e85d04;
+    --blue: #4a9eff;
+    --green: #3ecf8e;
+    --red: #ff4d6d;
+    --text: #e8eaf0;
+    --text2: #8892a4;
+    --text3: #5a6478;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* LAYOUT */
+  .app { display: flex; height: 100vh; }
+  
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px; min-width: 240px; background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; z-index: 100;
+    transition: width 0.3s ease;
+  }
+  .sidebar.collapsed { width: 64px; min-width: 64px; }
+  .logo-area {
+    padding: 20px 16px; display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-icon {
+    width: 36px; height: 36px; background: var(--accent); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+  }
+  .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: var(--text); white-space: nowrap; overflow: hidden; }
+  .logo-text span { color: var(--accent); }
+  
+  .nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
+  .nav-section-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); padding: 8px 10px 4px; white-space: nowrap; overflow: hidden; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--radius);
+    cursor: pointer; color: var(--text2); font-size: 14px; font-weight: 500;
+    transition: all 0.15s; margin-bottom: 2px; white-space: nowrap;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(245,166,35,0.12); color: var(--accent); }
+  .nav-item .icon { font-size: 16px; flex-shrink: 0; width: 20px; text-align: center; }
+  .nav-item .label { overflow: hidden; }
+  .nav-item .badge {
+    margin-left: auto; background: var(--accent); color: #000; font-size: 10px; font-weight: 700;
+    padding: 1px 6px; border-radius: 10px; flex-shrink: 0;
+  }
+
+  .sidebar-footer { padding: 12px 8px; border-top: 1px solid var(--border); }
+  .collapse-btn {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius);
+    cursor: pointer; color: var(--text3); font-size: 13px; transition: all 0.15s;
+  }
+  .collapse-btn:hover { color: var(--text2); }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* TOPBAR */
+  .topbar {
+    height: 60px; background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 24px; gap: 16px; flex-shrink: 0;
+  }
+  .topbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; }
+  .topbar-subtitle { color: var(--text3); font-size: 13px; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #ffb830; }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+  .btn-danger { background: rgba(255,77,109,0.15); color: var(--red); border: 1px solid rgba(255,77,109,0.3); }
+
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+  }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-weight: 600; font-size: 15px; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* STAT CARDS */
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .stat-card.orange::before { background: var(--accent); }
+  .stat-card.blue::before { background: var(--blue); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-icon { font-size: 28px; margin-bottom: 8px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 36px; line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-change { font-size: 12px; color: var(--green); margin-top: 6px; }
+
+  /* PROJECT CARDS */
+  .project-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; cursor: pointer; transition: all 0.2s;
+  }
+  .project-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .project-thumb { height: 120px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-size: 48px; position: relative; }
+  .project-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .project-status-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; }
+  .status-active { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .status-hold { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .status-complete { background: var(--blue); }
+  .project-info { padding: 14px; }
+  .project-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .project-meta { font-size: 12px; color: var(--text3); display: flex; gap: 12px; margin-bottom: 10px; }
+  .progress-bar { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+  .progress-fill.orange { background: var(--accent); }
+  .progress-fill.green { background: var(--green); }
+  .progress-fill.blue { background: var(--blue); }
+  .project-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; color: var(--text3); }
+
+  /* FILE GALLERY */
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .gallery-item {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; cursor: pointer; transition: all 0.2s; position: relative; group: true;
+  }
+  .gallery-item:hover { border-color: var(--blue); }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+  .gallery-thumb { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 36px; background: var(--surface3); }
+  .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .gallery-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.6); opacity: 0; transition: 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .overlay-btn {
+    width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;
+    border: 1px solid rgba(255,255,255,0.3); transition: background 0.15s;
+  }
+  .overlay-btn:hover { background: rgba(255,255,255,0.35); }
+  .gallery-label { padding: 8px; font-size: 11px; color: var(--text2); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gallery-file-icon { height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 32px; background: var(--surface3); gap: 4px; }
+  .file-ext { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text3); background: var(--surface); padding: 2px 6px; border-radius: 4px; }
+
+  /* LIGHTBOX */
+  .lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox-toolbar {
+    position: absolute; top: 0; left: 0; right: 0; height: 60px; background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; padding: 0 20px; gap: 10px;
+  }
+  .lightbox-title { font-size: 14px; color: var(--text2); margin-left: 8px; }
+  .lb-btn {
+    width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15); cursor: pointer; display: flex; align-items: center;
+    justify-content: center; font-size: 16px; color: var(--text); transition: background 0.15s;
+  }
+  .lb-btn:hover { background: rgba(255,255,255,0.2); }
+  .lightbox-img-wrap { position: relative; max-width: 90vw; max-height: 80vh; }
+  .lightbox-img { max-width: 90vw; max-height: 80vh; object-fit: contain; transition: transform 0.3s ease; border-radius: 4px; }
+  .lightbox-controls {
+    position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 40px; padding: 6px 12px;
+  }
+  .lightbox-close { margin-left: auto; }
+
+  /* AGENT CHAT */
+  .agent-panel {
+    position: fixed; right: 0; top: 0; bottom: 0; width: 380px; background: var(--surface);
+    border-left: 1px solid var(--border); z-index: 200; display: flex; flex-direction: column;
+    transform: translateX(100%); transition: transform 0.3s ease;
+  }
+  .agent-panel.open { transform: translateX(0); }
+  .agent-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .agent-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, var(--blue), var(--accent)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .agent-name { font-weight: 600; font-size: 15px; }
+  .agent-status { font-size: 11px; color: var(--green); }
+  .agent-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.5; }
+  .msg.agent { background: var(--surface2); border: 1px solid var(--border); color: var(--text); align-self: flex-start; border-radius: 4px 14px 14px 14px; }
+  .msg.user { background: var(--accent); color: #000; align-self: flex-end; font-weight: 500; border-radius: 14px 4px 14px 14px; }
+  .msg-time { font-size: 10px; color: var(--text3); margin-top: 4px; }
+  .agent-input-area { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+  .agent-input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 24px;
+    padding: 10px 16px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none;
+  }
+  .agent-input:focus { border-color: var(--accent); }
+  .agent-send {
+    width: 38px; height: 38px; background: var(--accent); border: none; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+  }
+  .quick-chips { display: flex; gap: 6px; padding: 0 16px 10px; flex-wrap: wrap; }
+  .chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 11px; cursor: pointer; color: var(--text2); transition: all 0.15s; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* AGENT TOGGLE */
+  .agent-toggle-btn {
+    position: fixed; right: 24px; bottom: 24px; width: 52px; height: 52px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--accent)); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    box-shadow: 0 4px 20px rgba(74,158,255,0.4); z-index: 300; transition: transform 0.2s;
+  }
+  .agent-toggle-btn:hover { transform: scale(1.08); }
+
+  /* UPLOAD AREA */
+  .upload-area {
+    border: 2px dashed var(--border); border-radius: 12px; padding: 40px;
+    text-align: center; cursor: pointer; transition: all 0.2s;
+  }
+  .upload-area:hover, .upload-area.drag { border-color: var(--accent); background: rgba(245,166,35,0.04); }
+  .upload-icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-text { font-size: 14px; color: var(--text2); }
+  .upload-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+  input[type="file"] { display: none; }
+
+  /* TAGS */
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .tag-orange { background: rgba(245,166,35,0.15); color: var(--accent); }
+  .tag-green { background: rgba(62,207,142,0.15); color: var(--green); }
+  .tag-blue { background: rgba(74,158,255,0.15); color: var(--blue); }
+  .tag-red { background: rgba(255,77,109,0.15); color: var(--red); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 10px; padding: 4px; margin-bottom: 20px; }
+  .tab-btn {
+    flex: 1; padding: 8px; border-radius: 7px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; background: transparent; color: var(--text3); transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text2); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); color: var(--text); }
+
+  /* CALCULATOR */
+  .calc-display {
+    background: var(--surface3); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .calc-expr { font-size: 12px; color: var(--text3); min-height: 18px; }
+  .calc-value { font-size: 32px; font-weight: 600; color: var(--text); text-align: right; }
+  .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .calc-btn {
+    padding: 14px; border-radius: 10px; border: none; cursor: pointer; font-size: 16px;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.1s; background: var(--surface2); color: var(--text);
+  }
+  .calc-btn:hover { background: var(--surface3); }
+  .calc-btn:active { transform: scale(0.95); }
+  .calc-btn.op { background: var(--surface3); color: var(--accent); }
+  .calc-btn.eq { background: var(--accent); color: #000; font-weight: 700; }
+  .calc-btn.clear { background: rgba(255,77,109,0.15); color: var(--red); }
+  .calc-btn.wide { grid-column: span 2; }
+
+  /* BUILD CALC */
+  .build-calc-section { margin-bottom: 20px; }
+  .build-calc-title { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+  .calc-row { display: grid; grid-template-columns: 1fr 120px 120px; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .calc-label { font-size: 13px; color: var(--text2); }
+  .calc-input {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 13px; color: var(--text); font-family: 'JetBrains Mono', monospace; outline: none;
+    width: 100%; text-align: right;
+  }
+  .calc-input:focus { border-color: var(--accent); }
+  .calc-total { background: var(--surface3); border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .calc-total-label { font-size: 13px; color: var(--text2); }
+  .calc-total-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--accent); }
+
+  /* NOTES */
+  .note-card {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; cursor: pointer; transition: all 0.2s;
+  }
+  .note-card:hover { border-color: var(--blue); }
+  .note-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+  .note-preview { font-size: 12px; color: var(--text3); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .note-meta { font-size: 10px; color: var(--text3); margin-top: 8px; display: flex; gap: 8px; }
+
+  /* TIMELINE */
+  .timeline { position: relative; }
+  .timeline::before { content: ''; position: absolute; left: 16px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { display: flex; gap: 20px; margin-bottom: 20px; position: relative; }
+  .timeline-dot { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; z-index: 1; }
+  .timeline-dot.done { background: var(--green); }
+  .timeline-dot.active { background: var(--accent); }
+  .timeline-dot.pending { background: var(--surface3); border: 2px solid var(--border); }
+  .timeline-content { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  .timeline-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  .timeline-date { font-size: 11px; color: var(--text3); }
+  .timeline-desc { font-size: 12px; color: var(--text2); margin-top: 6px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    width: 520px; max-width: 95vw; padding: 24px; position: relative;
+  }
+  .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-size: 14px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-select { appearance: none; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* SEARCH */
+  .search-bar {
+    display: flex; align-items: center; gap: 10px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px;
+  }
+  .search-bar input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; }
+  .search-bar input::placeholder { color: var(--text3); }
+  .search-icon { color: var(--text3); font-size: 16px; }
+
+  /* WEATHER WIDGET */
+  .weather-widget { background: linear-gradient(135deg, #1a2a4a, #0d1a2e); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; }
+  .weather-icon { font-size: 36px; }
+  .weather-info { flex: 1; }
+  .weather-temp { font-family: 'Bebas Neue', sans-serif; font-size: 32px; }
+  .weather-desc { font-size: 12px; color: var(--text3); }
+  .weather-extra { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .fade-up { animation: fadeUp 0.3s ease forwards; }
+  .thinking { animation: pulse 1.2s infinite; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .content { padding: 14px; }
+    .agent-panel { width: 100%; }
+  }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h4 { font-size: 16px; color: var(--text2); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; }
+
+  /* SNACKBAR */
+  .snackbar {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 20px; font-size: 13px; z-index: 1000; opacity: 0; transition: all 0.3s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .snackbar.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* CHECKLIST */
+  .checklist-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .checklist-item:last-child { border-bottom: none; }
+  .checkbox { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+  .checkbox.checked { background: var(--green); border-color: var(--green); }
+  .checklist-text { flex: 1; font-size: 13px; color: var(--text2); }
+  .checklist-text.done { text-decoration: line-through; color: var(--text3); }
+  .checklist-meta { font-size: 11px; color: var(--text3); }
+
+  /* SELECTOR BUTTONS */
+  .sel-btn {
+    padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text2); cursor: pointer; font-size: 12px; transition: all 0.15s;
+  }
+  .sel-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(245,166,35,0.08); }
+
+  /* TYPING INDICATOR */
+  .typing-indicator { display: flex; gap: 4px; padding: 4px 0; }
+  .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: typingBounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="logo-area">
+      <div class="logo-icon">🏗️</div>
+      <div class="logo-text">Build<span>Hub</span> Pro</div>
+    </div>
+    <div class="nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">📊</span><span class="label">Dashboard</span></div>
+      <div class="nav-item" onclick="showPage('projects',this)"><span class="icon">🏛️</span><span class="label">Projects</span><span class="badge" id="project-count">3</span></div>
+      <div class="nav-section-label">Project Tools</div>
+      <div class="nav-item" onclick="showPage('files',this)"><span class="icon">📁</span><span class="label">Files & Photos</span></div>
+      <div class="nav-item" onclick="showPage('timeline',this)"><span class="icon">📅</span><span class="label">Timeline</span></div>
+      <div class="nav-item" onclick="showPage('checklist',this)"><span class="icon">✅</span><span class="label">Checklist</span></div>
+      <div class="nav-section-label">Financials</div>
+      <div class="nav-item" onclick="showPage('calculator',this)"><span class="icon">🧮</span><span class="label">Calculator</span></div>
+      <div class="nav-item" onclick="showPage('budget',this)"><span class="icon">💰</span><span class="label">Budget</span></div>
+      <div class="nav-section-label">Collaboration</div>
+      <div class="nav-item" onclick="showPage('notes',this)"><span class="icon">📝</span><span class="label">Site Notes</span></div>
+      <div class="nav-item" onclick="showPage('contacts',this)"><span class="icon">👷</span><span class="label">Contacts</span></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="collapse-btn" onclick="toggleSidebar()"><span class="icon">◀</span><span class="label">Collapse</span></div>
+    </div>
+  </nav>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="page-title">DASHBOARD</div>
+        <div class="topbar-subtitle" id="page-subtitle">Overview of all active projects</div>
+      </div>
+      <div class="topbar-right">
+        <div id="active-project-label" class="tag tag-orange" style="display:none">📍 Site A</div>
+        <button class="btn btn-ghost" onclick="toggleAgent()">🤖 AI Agent</button>
+        <button class="btn btn-primary" onclick="openNewProjectModal()">+ New Project</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- DASHBOARD PAGE -->
+      <div class="page active" id="page-dashboard">
+        <div class="grid-4" style="margin-bottom:20px">
+          <div class="stat-card orange"><div class="stat-icon">🏗️</div><div class="stat-value">3</div><div class="stat-label">Active Projects</div><div class="stat-change">↑ 1 this month</div></div>
+          <div class="stat-card blue"><div class="stat-icon">📸</div><div class="stat-value" id="total-files">12</div><div class="stat-label">Files Uploaded</div><div class="stat-change">↑ 5 this week</div></div>
+          <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-value">68%</div><div class="stat-label">Avg. Completion</div><div class="stat-change">↑ 4% this week</div></div>
+          <div class="stat-card red"><div class="stat-icon">💷</div><div class="stat-value">£2.1M</div><div class="stat-label">Total Budget</div><div class="stat-change">£420k spent</div></div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:20px">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div style="font-weight:600">Active Projects</div>
+              <button class="btn btn-ghost" style="font-size:12px;padding:5px 10px" onclick="showPage('projects',null)">View All →</button>
+            </div>
+            <div id="dashboard-projects"></div>
+          </div>
+          <div>
+            <div style="font-weight:600;margin-bottom:12px">Site Conditions</div>
+            <div class="weather-widget" style="margin-bottom:12px">
+              <div class="weather-icon">⛅</div>
+              <div class="weather-info">
+                <div class="weather-temp">14°C</div>
+                <div class="weather-desc">Partly cloudy — OK to pour concrete</div>
+                <div class="weather-extra">Wind: 12 km/h · Humidity: 62%</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Today's Tasks</div><span class="tag tag-orange">4 pending</span></div>
+              <div id="dashboard-tasks"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recent Activity</div></div>
+          <div id="activity-feed"></div>
+        </div>
+      </div>
+
+      <!-- PROJECTS PAGE -->
+      <div class="page" id="page-projects">
+        <div style="display:flex;gap:10px;margin-bottom:20px;align-items:center">
+          <div class="search-bar" style="flex:1">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search projects..." oninput="filterProjects(this.value)" id="project-search">
+          </div>
+          <button class="sel-btn active">All</button>
+          <button class="sel-btn">Active</button>
+          <button class="sel-btn">On Hold</button>
+          <button class="sel-btn">Complete</button>
+        </div>
+        <div class="grid-3" id="projects-grid"></div>
+      </div>
+
+      <!-- FILES PAGE -->
+      <div class="page" id="page-files">
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <div class="search-bar" style="flex:1;min-width:200px">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search files and photos..." oninput="filterFiles(this.value)">
+          </div>
+          <select class="form-input form-select" style="width:160px" onchange="filterByType(this.value)">
+            <option value="">All Types</option>
+            <option value="image">📸 Images</option>
+            <option value="pdf">📄 PDFs</option>
+            <option value="doc">📝 Documents</option>
+            <option value="dwg">📐 Drawings</option>
+          </select>
+        </div>
+
+        <label class="upload-area" id="upload-area" for="file-upload-input">
+          <div class="upload-icon">☁️</div>
+          <div class="upload-text">Drop files here or <span style="color:var(--accent)">browse to upload</span></div>
+          <div class="upload-sub">Supports JPG, PNG, PDF, DWG, DOCX — Max 50MB each</div>
+          <input type="file" id="file-upload-input" multiple accept="image/*,.pdf,.docx,.dwg" onchange="handleFileUpload(event)">
+        </label>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px">
+          <div style="font-weight:600" id="files-count">12 files</div>
+          <div style="display:flex;gap:6px">
+            <button class="lb-btn" title="Grid view">⊞</button>
+            <button class="lb-btn" title="List view">☰</button>
+          </div>
+        </div>
+        <div class="gallery-grid" id="files-gallery"></div>
+      </div>
+
+      <!-- TIMELINE PAGE -->
+      <div class="page" id="page-timeline">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div class="tabs" style="width:auto;margin:0">
+            <button class="tab-btn active">Gantt View</button>
+            <button class="tab-btn">Milestones</button>
+          </div>
+          <button class="btn btn-primary" onclick="showSnackbar('📅 Add milestone coming soon!')">+ Add Milestone</button>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header"><div class="card-title">Project Timeline — Site A: Riverside Towers</div><span class="tag tag-orange">In Progress</span></div>
+          <div id="gantt-bars" style="padding:8px 0"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Milestones</div></div>
+          <div class="timeline" id="timeline-list"></div>
+        </div>
+      </div>
+
+      <!-- CHECKLIST PAGE -->
+      <div class="page" id="page-checklist">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div class="tabs" style="width:auto;margin:0">
+            <button class="tab-btn active" onclick="filterChecklist('all',this)">All</button>
+            <button class="tab-btn" onclick="filterChecklist('pending',this)">Pending</button>
+            <button class="tab-btn" onclick="filterChecklist('done',this)">Done</button>
+          </div>
+          <button class="btn btn-primary" onclick="addChecklistItem()">+ Add Item</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Site Inspection Checklist</div><div id="checklist-progress" class="tag tag-green">0/0 done</div></div>
+          <div id="checklist-items"></div>
+        </div>
+      </div>
+
+      <!-- CALCULATOR PAGE -->
+      <div class="page" id="page-calculator">
+        <div class="grid-2">
+          <div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-header"><div class="card-title">🧮 Standard Calculator</div></div>
+              <div class="calc-display">
+                <div class="calc-expr" id="calc-expr"></div>
+                <div class="calc-value" id="calc-display">0</div>
+              </div>
+              <div class="calc-grid">
+                <button class="calc-btn clear wide" onclick="calcClear()">Clear</button>
+                <button class="calc-btn op" onclick="calcInput('(')">(</button>
+                <button class="calc-btn op" onclick="calcInput(')')">)</button>
+                <button class="calc-btn op" onclick="calcInput('%')">%</button>
+                <button class="calc-btn op" onclick="calcOp('/')">÷</button>
+                <button class="calc-btn" onclick="calcInput('7')">7</button>
+                <button class="calc-btn" onclick="calcInput('8')">8</button>
+                <button class="calc-btn" onclick="calcInput('9')">9</button>
+                <button class="calc-btn op" onclick="calcOp('*')">×</button>
+                <button class="calc-btn" onclick="calcInput('4')">4</button>
+                <button class="calc-btn" onclick="calcInput('5')">5</button>
+                <button class="calc-btn" onclick="calcInput('6')">6</button>
+                <button class="calc-btn op" onclick="calcOp('-')">−</button>
+                <button class="calc-btn" onclick="calcInput('1')">1</button>
+                <button class="calc-btn" onclick="calcInput('2')">2</button>
+                <button class="calc-btn" onclick="calcInput('3')">3</button>
+                <button class="calc-btn op" onclick="calcOp('+')">+</button>
+                <button class="calc-btn" onclick="calcInput('0')">0</button>
+                <button class="calc-btn" onclick="calcInput('.')">.</button>
+                <button class="calc-btn op" onclick="calcBackspace()">⌫</button>
+                <button class="calc-btn eq" onclick="calcEquals()">=</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">🏗️ Build Cost Estimator</div></div>
+              <div class="build-calc-section">
+                <div class="build-calc-title">📐 Concrete & Foundations</div>
+                <div class="calc-row"><div class="calc-label">Volume (m³)</div><input class="calc-input" type="number" id="concrete-vol" value="50" oninput="updateBuildCalc()"><div class="calc-input" id="concrete-cost" style="background:var(--surface3)">£4,500</div></div>
+                <div class="calc-row"><div class="calc-label">Steel Rebar (tonnes)</div><input class="calc-input" type="number" id="rebar-ton" value="5" oninput="updateBuildCalc()"><div class="calc-input" id="rebar-cost" style="background:var(--surface3)">£5,500</div></div>
+              </div>
+              <div class="build-calc-section">
+                <div class="build-calc-title">🧱 Structure</div>
+                <div class="calc-row"><div class="calc-label">Brickwork (m²)</div><input class="calc-input" type="number" id="brick-area" value="200" oninput="updateBuildCalc()"><div class="calc-input" id="brick-cost" style="background:var(--surface3)">£12,000</div></div>
+                <div class="calc-row"><div class="calc-label">Timber Frame (m²)</div><input class="calc-input" type="number" id="timber-area" value="100" oninput="updateBuildCalc()"><div class="calc-input" id="timber-cost" style="background:var(--surface3)">£7,000</div></div>
+              </div>
+              <div class="build-calc-section">
+                <div class="build-calc-title">🔌 MEP Services</div>
+                <div class="calc-row"><div class="calc-label">Electrical (points)</div><input class="calc-input" type="number" id="elec-pts" value="80" oninput="updateBuildCalc()"><div class="calc-input" id="elec-cost" style="background:var(--surface3)">£8,000</div></div>
+                <div class="calc-row"><div class="calc-label">Plumbing (units)</div><input class="calc-input" type="number" id="plumb-units" value="20" oninput="updateBuildCalc()"><div class="calc-input" id="plumb-cost" style="background:var(--surface3)">£6,000</div></div>
+              </div>
+              <div class="build-calc-section">
+                <div class="build-calc-title">🪟 Finishes</div>
+                <div class="calc-row"><div class="calc-label">Flooring (m²)</div><input class="calc-input" type="number" id="floor-area" value="300" oninput="updateBuildCalc()"><div class="calc-input" id="floor-cost" style="background:var(--surface3)">£15,000</div></div>
+              </div>
+              <div class="calc-total">
+                <div>
+                  <div class="calc-total-label">Estimated Total</div>
+                  <div style="font-size:11px;color:var(--text3)">Incl. 15% contingency</div>
+                </div>
+                <div class="calc-total-value" id="build-total">£68,500</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUDGET PAGE -->
+      <div class="page" id="page-budget">
+        <div class="grid-3" style="margin-bottom:20px">
+          <div class="stat-card green"><div class="stat-icon">💰</div><div class="stat-value">£2.1M</div><div class="stat-label">Total Budget</div></div>
+          <div class="stat-card orange"><div class="stat-icon">💸</div><div class="stat-value">£420k</div><div class="stat-label">Spent to Date</div></div>
+          <div class="stat-card blue"><div class="stat-icon">📊</div><div class="stat-value">£1.68M</div><div class="stat-label">Remaining</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Budget Breakdown</div><button class="btn btn-ghost" style="font-size:12px;padding:5px 10px">Export CSV</button></div>
+          <div class="table-wrap">
+            <table id="budget-table">
+              <thead><tr><th>Category</th><th>Budget</th><th>Spent</th><th>Remaining</th><th>Status</th></tr></thead>
+              <tbody id="budget-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTES PAGE -->
+      <div class="page" id="page-notes">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div class="search-bar" style="flex:1;margin-right:12px">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search notes...">
+          </div>
+          <button class="btn btn-primary" onclick="openNoteModal()">+ New Note</button>
+        </div>
+        <div class="grid-3" id="notes-grid"></div>
+      </div>
+
+      <!-- CONTACTS PAGE -->
+      <div class="page" id="page-contacts">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div class="search-bar" style="flex:1;margin-right:12px">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search contacts...">
+          </div>
+          <button class="btn btn-primary" onclick="showSnackbar('📞 Add contact coming soon!')">+ Add Contact</button>
+        </div>
+        <div class="table-wrap card">
+          <table id="contacts-table">
+            <thead><tr><th>Name</th><th>Role</th><th>Company</th><th>Phone</th><th>Email</th><th>Project</th></tr></thead>
+            <tbody id="contacts-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AGENT PANEL -->
+<div class="agent-panel" id="agent-panel">
+  <div class="agent-header">
+    <div class="agent-avatar">🤖</div>
+    <div>
+      <div class="agent-name">BuildBot Agent</div>
+      <div class="agent-status">● Online — ready to help</div>
+    </div>
+    <button class="lb-btn" onclick="toggleAgent()" style="margin-left:auto">✕</button>
+  </div>
+  <div class="agent-messages" id="agent-messages">
+    <div class="msg agent">
+      👋 Hi! I'm BuildBot, your construction AI assistant.<br><br>
+      I can help you find files, photos, documents, or answer questions about any project. Try asking me something!
+      <div class="msg-time">Just now</div>
+    </div>
+  </div>
+  <div class="quick-chips" id="quick-chips">
+    <div class="chip" onclick="agentQuery(this.innerText)">Show site photos</div>
+    <div class="chip" onclick="agentQuery(this.innerText)">Find floor plans</div>
+    <div class="chip" onclick="agentQuery(this.innerText)">Budget summary</div>
+    <div class="chip" onclick="agentQuery(this.innerText)">Upcoming milestones</div>
+    <div class="chip" onclick="agentQuery(this.innerText)">Safety checklist</div>
+  </div>
+  <div class="agent-input-area">
+    <input class="agent-input" id="agent-input" placeholder="Ask about files, photos, budgets..." onkeydown="if(event.key==='Enter')sendAgentMsg()">
+    <button class="agent-send" onclick="sendAgentMsg()">➤</button>
+  </div>
+</div>
+
+<!-- AGENT TOGGLE BUTTON -->
+<button class="agent-toggle-btn" onclick="toggleAgent()" title="Open AI Agent">🤖</button>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-toolbar">
+    <button class="lb-btn" onclick="rotateLB(-90)" title="Rotate Left">↺</button>
+    <button class="lb-btn" onclick="rotateLB(90)" title="Rotate Right">↻</button>
+    <button class="lb-btn" onclick="zoomLB(0.2)" title="Zoom In">＋</button>
+    <button class="lb-btn" onclick="zoomLB(-0.2)" title="Zoom Out">－</button>
+    <button class="lb-btn" onclick="resetLB()" title="Reset">⊙</button>
+    <button class="lb-btn" onclick="flipLB('H')" title="Flip Horizontal">↔</button>
+    <button class="lb-btn" onclick="flipLB('V')" title="Flip Vertical">↕</button>
+    <span class="lightbox-title" id="lb-title">Image</span>
+    <button class="lb-btn lightbox-close" onclick="closeLB()">✕</button>
+  </div>
+  <div class="lightbox-img-wrap">
+    <img class="lightbox-img" id="lb-img" src="" alt="Preview">
+  </div>
+</div>
+
+<!-- NEW PROJECT MODAL -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal">
+    <h3>🏗️ Create New Project</h3>
+    <div class="form-group"><label class="form-label">Project Name</label><input class="form-input" id="new-proj-name" placeholder="e.g. Riverside Towers"></div>
+    <div class="form-group"><label class="form-label">Project Type</label>
+      <select class="form-input form-select" id="new-proj-type">
+        <option>Residential</option><option>Commercial</option><option>Industrial</option><option>Infrastructure</option>
+      </select>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" type="date" id="new-proj-start"></div>
+      <div class="form-group"><label class="form-label">End Date</label><input class="form-input" type="date" id="new-proj-end"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Budget (£)</label><input class="form-input" id="new-proj-budget" type="number" placeholder="500000"></div>
+    <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="new-proj-location" placeholder="e.g. Manchester, UK"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('project-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createProject()">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE MODAL -->
+<div class="modal-overlay" id="note-modal">
+  <div class="modal">
+    <h3>📝 New Site Note</h3>
+    <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="new-note-title" placeholder="Note title..."></div>
+    <div class="form-group"><label class="form-label">Content</label><textarea class="form-input" id="new-note-content" rows="4" placeholder="Write your note here..."></textarea></div>
+    <div class="form-group"><label class="form-label">Tag</label>
+      <select class="form-input form-select" id="new-note-tag">
+        <option value="orange">⚠️ Important</option><option value="blue">ℹ️ Info</option><option value="green">✅ Resolved</option><option value="red">🚨 Urgent</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('note-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- SNACKBAR -->
+<div class="snackbar" id="snackbar"></div>
+
+<script>
+// ===== STATE =====
+let lbRotation = 0, lbScale = 1, lbFlipH = 1, lbFlipV = 1;
+let calcExpr = '', calcInput_ = '0';
+let agentOpen = false;
+
+const projects = [
+  { id:1, name:'Riverside Towers', type:'Residential', location:'Manchester', status:'active', progress:62, files:8, budget:'£850k', emoji:'🏢', color:'orange' },
+  { id:2, name:'Westgate Bridge', type:'Infrastructure', location:'Leeds', status:'active', progress:35, files:3, budget:'£1.2M', emoji:'🌉', color:'blue' },
+  { id:3, name:'The Granary Lofts', type:'Commercial', location:'London', status:'hold', progress:88, files:1, budget:'£560k', emoji:'🏭', color:'green' },
+];
+
+const files = [
+  { name:'Foundation_Plan_v3.pdf', type:'pdf', size:'2.4 MB', date:'May 10', tag:'pdf' },
+  { name:'Site_Photo_001.jpg', type:'image', size:'3.1 MB', date:'May 09', tag:'image', url:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400' },
+  { name:'Site_Photo_002.jpg', type:'image', size:'2.8 MB', date:'May 08', tag:'image', url:'https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?w=400' },
+  { name:'Structural_Report.docx', type:'doc', size:'1.1 MB', date:'May 07', tag:'doc' },
+  { name:'Site_Photo_003.jpg', type:'image', size:'4.2 MB', date:'May 06', tag:'image', url:'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400' },
+  { name:'Floor_Plan_Level1.dwg', type:'dwg', size:'5.6 MB', date:'May 05', tag:'dwg' },
+  { name:'Site_Photo_004.jpg', type:'image', size:'3.5 MB', date:'May 04', tag:'image', url:'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=400' },
+  { name:'Safety_Inspection.pdf', type:'pdf', size:'0.9 MB', date:'May 03', tag:'pdf' },
+  { name:'Crane_Setup.jpg', type:'image', size:'2.9 MB', date:'May 02', tag:'image', url:'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400' },
+  { name:'MEP_Drawings.pdf', type:'pdf', size:'7.2 MB', date:'May 01', tag:'pdf' },
+  { name:'Site_Photo_005.jpg', type:'image', size:'3.3 MB', date:'Apr 30', tag:'image', url:'https://images.unsplash.com/photo-1571043733117-85064d23e0e3?w=400' },
+  { name:'Contract_Phase2.docx', type:'doc', size:'0.8 MB', date:'Apr 29', tag:'doc' },
+];
+
+const milestones = [
+  { title:'Site Clearance', date:'Jan 15, 2025', desc:'Complete site clearance and fencing installation.', status:'done', icon:'✅' },
+  { title:'Foundation Works', date:'Feb 20, 2025', desc:'Excavation, piling, and concrete poured for all cores.', status:'done', icon:'✅' },
+  { title:'Ground Floor Slab', date:'Mar 18, 2025', desc:'Ground floor slab completed and cured.', status:'done', icon:'✅' },
+  { title:'Superstructure Level 4', date:'May 30, 2025', desc:'Steel frame erection up to level 4 in progress.', status:'active', icon:'🔧' },
+  { title:'Roof Structure', date:'Jul 15, 2025', desc:'Roof joists and waterproof membrane.', status:'pending', icon:'🏗️' },
+  { title:'External Cladding', date:'Sep 01, 2025', desc:'Curtain walling and external insulation system.', status:'pending', icon:'🧱' },
+  { title:'Practical Completion', date:'Dec 20, 2025', desc:'Final snagging and handover to client.', status:'pending', icon:'🏆' },
+];
+
+const checklistItems = [
+  { id:1, text:'Site boundary perimeter check', category:'Safety', done:true, priority:'high' },
+  { id:2, text:'PPE compliance — all workers on site', category:'Safety', done:true, priority:'high' },
+  { id:3, text:'Scaffold inspection sign-off', category:'Safety', done:false, priority:'high' },
+  { id:4, text:'Concrete pour quality check (Level 3)', category:'QA', done:false, priority:'medium' },
+  { id:5, text:'Material delivery logged', category:'Logistics', done:true, priority:'low' },
+  { id:6, text:'Weekly progress photos uploaded', category:'Documentation', done:false, priority:'medium' },
+  { id:7, text:'Structural engineer sign-off on Level 3 beams', category:'QA', done:false, priority:'high' },
+  { id:8, text:'Site diary updated', category:'Documentation', done:true, priority:'low' },
+  { id:9, text:'Waste manifest completed', category:'Environment', done:false, priority:'medium' },
+  { id:10, text:'Sub-contractor attendance sheet signed', category:'HR', done:true, priority:'low' },
+];
+
+const notes = [
+  { title:'Concrete Pour Delay — Level 3', content:'Ready-mix supplier delayed by 2 hours. Crew stood down. No impact to critical path. Need to reschedule pour for Tue 13th, confirm with structural.', tag:'orange', date:'May 10, 2025', author:'J. Smith' },
+  { title:'Scaffold Inspection Passed', content:'Third party scaffold inspector visited today. All platforms signed off. Green card issued. Copy filed in site file A3.', tag:'green', date:'May 9, 2025', author:'M. Parker' },
+  { title:'Crane Lift — Restricted Zone', content:'Tower crane lift on Wednesday 14th. Road restriction required 07:00–14:00. Council permit ref: MCC-2025-441. Notify neighbours.', tag:'red', date:'May 8, 2025', author:'L. Chen' },
+  { title:'Material Order — Steel Rebar', content:'Phase 3 rebar order confirmed with Tata Steel. Delivery expected 16th May. Confirm with logistics re: storage area on Site A east compound.', tag:'blue', date:'May 7, 2025', author:'J. Smith' },
+  { title:'Client Walk-Around Notes', content:'Client pleased with progress. Queried window specification on Level 2 south elevation — check spec clause 5.3. Follow up email sent.', tag:'blue', date:'May 6, 2025', author:'K. Williams' },
+  { title:'URGENT: Gas Line Near Excavation', content:'Sub-contractor identified possible unmarked gas line at grid ref D7. Works stopped. Cadent Gas called — attending tomorrow AM. Area cordoned off.', tag:'red', date:'May 5, 2025', author:'Site Manager' },
+];
+
+const contacts = [
+  { name:'James Smith', role:'Site Manager', company:'BuildCo Ltd', phone:'07700 900123', email:'j.smith@buildco.com', project:'Riverside Towers' },
+  { name:'Maria Parker', role:'Structural Engineer', company:'Parker & Assoc.', phone:'07700 900456', email:'m.parker@pa-eng.com', project:'All Sites' },
+  { name:'David Chen', role:'Main Contractor', company:'Chen Construction', phone:'07700 900789', email:'d.chen@chencon.com', project:'Westgate Bridge' },
+  { name:'Karen Williams', role:'Client Rep', company:'Riverside Dev.', phone:'07700 900321', email:'k.williams@rivdev.com', project:'Riverside Towers' },
+  { name:'Tom Harris', role:'QS / Cost Manager', company:'Harris QS', phone:'07700 900654', email:'t.harris@harrisqs.com', project:'All Sites' },
+  { name:'Sarah Okafor', role:'Health & Safety', company:'SafeBuild Ltd', phone:'07700 900987', email:'s.okafor@safebuild.com', project:'All Sites' },
+];
+
+const budgetItems = [
+  { category:'Preliminaries', budget:150000, spent:98000 },
+  { category:'Groundworks & Foundations', budget:320000, spent:315000 },
+  { category:'Superstructure (Steel/Frame)', budget:480000, spent:120000 },
+  { category:'External Envelope', budget:280000, spent:0 },
+  { category:'MEP Services', budget:350000, spent:45000 },
+  { category:'Internal Finishes', budget:210000, spent:0 },
+  { category:'Landscaping', budget:80000, spent:0 },
+  { category:'Contingency (10%)', budget:210000, spent:42000 },
+];
+
+const activities = [
+  { icon:'📸', text:'5 photos uploaded to Riverside Towers', time:'2 hours ago' },
+  { icon:'✅', text:'Foundation inspection completed — Level 3', time:'4 hours ago' },
+  { icon:'💬', text:'Note added: "Gas line near excavation"', time:'Yesterday' },
+  { icon:'📄', text:'MEP_Drawings.pdf uploaded', time:'Yesterday' },
+  { icon:'👷', text:'Sarah Okafor added as H&S contact', time:'2 days ago' },
+  { icon:'💰', text:'Budget updated: Groundworks phase complete', time:'3 days ago' },
+];
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  renderDashboard();
+  renderProjects();
+  renderFiles();
+  renderTimeline();
+  renderChecklist();
+  renderBudget();
+  renderNotes();
+  renderContacts();
+  setupUploadDrag();
+  updateBuildCalc();
+  // set today's date in new project form
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('new-proj-start').value = today;
+});
+
+// ===== NAVIGATION =====
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(name)) n.classList.add('active');
+    });
+  }
+  const titles = { dashboard:'DASHBOARD', projects:'PROJECTS', files:'FILES & PHOTOS', timeline:'PROJECT TIMELINE', checklist:'SITE CHECKLIST', calculator:'CALCULATOR', budget:'BUDGET TRACKER', notes:'SITE NOTES', contacts:'TEAM CONTACTS' };
+  const subs = { dashboard:'Overview of all active projects', projects:'Manage and switch between build sites', files:'All project images and documents', timeline:'Project schedule and milestones', checklist:'Daily inspection and task lists', calculator:'Standard & build cost calculator', budget:'Cost tracking and budget breakdown', notes:'Field notes and site diary', contacts:'Team, contractors, and client contacts' };
+  document.getElementById('page-title').textContent = titles[name] || name.toUpperCase();
+  document.getElementById('page-subtitle').textContent = subs[name] || '';
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const dp = document.getElementById('dashboard-projects');
+  dp.innerHTML = projects.slice(0,2).map(p => `
+    <div class="project-card" onclick="showPage('projects',null)" style="margin-bottom:10px;display:flex;align-items:center;gap:12px;padding:14px">
+      <div style="font-size:28px">${p.emoji}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px;margin-bottom:4px">${p.name}</div>
+        <div class="progress-bar"><div class="progress-fill ${p.color}" style="width:${p.progress}%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px"><span>${p.location}</span><span>${p.progress}%</span></div>
+      </div>
+    </div>
+  `).join('');
+
+  const dt = document.getElementById('dashboard-tasks');
+  const todayTasks = checklistItems.filter(c => !c.done).slice(0,4);
+  dt.innerHTML = todayTasks.map(t => `
+    <div class="checklist-item" onclick="toggleCheck(${t.id})">
+      <div class="checkbox ${t.done?'checked':''}">${t.done?'✓':''}</div>
+      <div class="checklist-text ${t.done?'done':''}" style="font-size:13px">${t.text}</div>
+      <span class="tag tag-${t.priority==='high'?'red':t.priority==='medium'?'orange':'blue'}" style="font-size:10px">${t.priority}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('activity-feed').innerHTML = activities.map(a => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:18px;width:28px;text-align:center">${a.icon}</div>
+      <div style="flex:1;font-size:13px;color:var(--text2)">${a.text}</div>
+      <div style="font-size:11px;color:var(--text3);white-space:nowrap">${a.time}</div>
+    </div>
+  `).join('');
+}
+
+// ===== PROJECTS =====
+function renderProjects() {
+  const g = document.getElementById('projects-grid');
+  g.innerHTML = projects.map(p => `
+    <div class="project-card fade-up" onclick="selectProject(${p.id})">
+      <div class="project-thumb">
+        ${p.emoji}
+        <div class="project-status-dot status-${p.status}"></div>
+      </div>
+      <div class="project-info">
+        <div class="project-name">${p.name}</div>
+        <div class="project-meta"><span>📍 ${p.location}</span><span>🏗️ ${p.type}</span></div>
+        <div class="progress-bar"><div class="progress-fill ${p.color}" style="width:${p.progress}%"></div></div>
+        <div class="project-footer">
+          <span>${p.progress}% complete</span>
+          <span>${p.files} files</span>
+          <span>${p.budget}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('project-count').textContent = projects.length;
+}
+
+function selectProject(id) {
+  const p = projects.find(x => x.id === id);
+  document.getElementById('active-project-label').textContent = '📍 ' + p.name;
+  document.getElementById('active-project-label').style.display = 'inline-flex';
+  showSnackbar('📍 Switched to: ' + p.name);
+}
+
+function filterProjects(q) {
+  const all = document.querySelectorAll('#projects-grid .project-card');
+  all.forEach((el, i) => {
+    const name = projects[i]?.name.toLowerCase() || '';
+    el.style.display = name.includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+// ===== FILES =====
+function renderFiles(filter) {
+  const f = filter ? files.filter(x => x.tag === filter) : files;
+  const g = document.getElementById('files-gallery');
+  document.getElementById('files-count').textContent = f.length + ' files';
+  document.getElementById('total-files').textContent = files.length;
+  g.innerHTML = f.map((file, i) => {
+    if (file.type === 'image') {
+      return `<div class="gallery-item fade-up">
+        <div class="gallery-thumb"><img src="${file.url}" alt="${file.name}" loading="lazy"></div>
+        <div class="gallery-overlay">
+          <div class="overlay-btn" onclick="openLightbox('${file.url}','${file.name}')" title="View">👁</div>
+          <div class="overlay-btn" onclick="showSnackbar('📥 Downloading...')" title="Download">⬇</div>
+          <div class="overlay-btn" onclick="showSnackbar('🔗 Link copied!')" title="Share">🔗</div>
+        </div>
+        <div class="gallery-label">${file.name}</div>
+      </div>`;
+    } else {
+      const icons = { pdf:'📄', doc:'📝', dwg:'📐' };
+      return `<div class="gallery-item fade-up">
+        <div class="gallery-file-icon">${icons[file.type] || '📁'}<div class="file-ext">.${file.type}</div></div>
+        <div class="gallery-overlay">
+          <div class="overlay-btn" onclick="showSnackbar('📄 Opening ${file.name}')" title="Open">👁</div>
+          <div class="overlay-btn" onclick="showSnackbar('📥 Downloading...')" title="Download">⬇</div>
+        </div>
+        <div class="gallery-label">${file.name}</div>
+      </div>`;
+    }
+  }).join('');
+}
+
+function filterByType(val) { renderFiles(val || null); }
+function filterFiles(q) {
+  document.querySelectorAll('#files-gallery .gallery-item').forEach((el, i) => {
+    el.style.display = files[i]?.name.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function handleFileUpload(e) {
+  const newFiles = Array.from(e.target.files);
+  newFiles.forEach(file => {
+    const entry = { name: file.name, type: file.type.startsWith('image') ? 'image' : 'doc', size: (file.size/1024/1024).toFixed(1)+' MB', date: 'Today', tag: file.type.startsWith('image') ? 'image' : 'doc' };
+    if (file.type.startsWith('image')) {
+      entry.url = URL.createObjectURL(file);
+    }
+    files.unshift(entry);
+  });
+  renderFiles();
+  showSnackbar(`☁️ ${newFiles.length} file(s) uploaded successfully`);
+  document.getElementById('total-files').textContent = files.length;
+}
+
+function setupUploadDrag() {
+  const area = document.getElementById('upload-area');
+  area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('drag'); });
+  area.addEventListener('dragleave', () => area.classList.remove('drag'));
+  area.addEventListener('drop', e => {
+    e.preventDefault(); area.classList.remove('drag');
+    const dt = e.dataTransfer;
+    if (dt.files.length) handleFileUpload({ target: { files: dt.files } });
+  });
+}
+
+// ===== LIGHTBOX =====
+function openLightbox(url, name) {
+  lbRotation = 0; lbScale = 1; lbFlipH = 1; lbFlipV = 1;
+  document.getElementById('lb-img').src = url;
+  document.getElementById('lb-title').textContent = name;
+  applyLBTransform();
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLB() { document.getElementById('lightbox').classList.remove('open'); }
+function applyLBTransform() {
+  const img = document.getElementById('lb-img');
+  img.style.transform = `rotate(${lbRotation}deg) scale(${lbScale}) scaleX(${lbFlipH}) scaleY(${lbFlipV})`;
+}
+function rotateLB(deg) { lbRotation += deg; applyLBTransform(); }
+function zoomLB(d) { lbScale = Math.max(0.2, Math.min(4, lbScale + d)); applyLBTransform(); }
+function resetLB() { lbRotation=0; lbScale=1; lbFlipH=1; lbFlipV=1; applyLBTransform(); }
+function flipLB(dir) { if(dir==='H') lbFlipH *= -1; else lbFlipV *= -1; applyLBTransform(); }
+document.getElementById('lightbox').addEventListener('click', function(e) { if(e.target === this) closeLB(); });
+
+// ===== TIMELINE =====
+function renderTimeline() {
+  // Gantt-style bars
+  const phases = [
+    { name:'Site Clearance', start:0, width:8, color:'var(--green)' },
+    { name:'Foundation Works', start:8, width:15, color:'var(--green)' },
+    { name:'Ground Floor Slab', start:22, width:8, color:'var(--green)' },
+    { name:'Superstructure', start:28, width:30, color:'var(--accent)' },
+    { name:'Roof Structure', start:55, width:15, color:'var(--surface3)' },
+    { name:'External Cladding', start:65, width:18, color:'var(--surface3)' },
+    { name:'Finishes', start:75, width:20, color:'var(--surface3)' },
+    { name:'Completion', start:95, width:5, color:'var(--blue)' },
+  ];
+  document.getElementById('gantt-bars').innerHTML = phases.map(p => `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="width:140px;font-size:12px;color:var(--text2);text-align:right;flex-shrink:0">${p.name}</div>
+      <div style="flex:1;height:20px;background:var(--surface3);border-radius:4px;position:relative">
+        <div style="position:absolute;left:${p.start}%;width:${p.width}%;height:100%;background:${p.color};border-radius:4px;opacity:0.85;transition:width 0.6s"></div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('timeline-list').innerHTML = milestones.map(m => `
+    <div class="timeline-item">
+      <div class="timeline-dot ${m.status}">${m.icon}</div>
+      <div class="timeline-content">
+        <div class="timeline-title">${m.title}</div>
+        <div class="timeline-date">📅 ${m.date}</div>
+        <div class="timeline-desc">${m.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== CHECKLIST =====
+function renderChecklist(filter) {
+  let items = filter === 'pending' ? checklistItems.filter(c => !c.done) :
+               filter === 'done' ? checklistItems.filter(c => c.done) : checklistItems;
+  document.getElementById('checklist-items').innerHTML = items.map(item => `
+    <div class="checklist-item" id="check-${item.id}">
+      <div class="checkbox ${item.done?'checked':''}" onclick="toggleCheck(${item.id})">${item.done?'✓':''}</div>
+      <div class="checklist-text ${item.done?'done':''}">${item.text}</div>
+      <span class="tag tag-blue" style="font-size:10px">${item.category}</span>
+      <span class="tag tag-${item.priority==='high'?'red':item.priority==='medium'?'orange':'green'}" style="font-size:10px">${item.priority}</span>
+    </div>
+  `).join('');
+  updateChecklistProgress();
+}
+
+function toggleCheck(id) {
+  const item = checklistItems.find(c => c.id === id);
+  if (item) { item.done = !item.done; renderChecklist(); renderDashboard(); }
+}
+
+function updateChecklistProgress() {
+  const done = checklistItems.filter(c => c.done).length;
+  document.getElementById('checklist-progress').textContent = `${done}/${checklistItems.length} done`;
+}
+
+function filterChecklist(filter, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderChecklist(filter === 'all' ? null : filter);
+}
+
+function addChecklistItem() {
+  const text = prompt('Enter checklist item:');
+  if (text) {
+    checklistItems.push({ id: Date.now(), text, category:'General', done:false, priority:'medium' });
+    renderChecklist();
+    showSnackbar('✅ Item added to checklist');
+  }
+}
+
+// ===== BUDGET =====
+function renderBudget() {
+  document.getElementById('budget-tbody').innerHTML = budgetItems.map(b => {
+    const remaining = b.budget - b.spent;
+    const pct = ((b.spent / b.budget) * 100).toFixed(0);
+    const status = pct > 90 ? 'red' : pct > 60 ? 'orange' : 'green';
+    return `<tr>
+      <td style="color:var(--text)">${b.category}</td>
+      <td>£${b.budget.toLocaleString()}</td>
+      <td>£${b.spent.toLocaleString()}</td>
+      <td style="color:${remaining > 0 ? 'var(--green)':'var(--red)'}">£${remaining.toLocaleString()}</td>
+      <td><span class="tag tag-${status}">${pct}% used</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== NOTES =====
+function renderNotes() {
+  document.getElementById('notes-grid').innerHTML = notes.map((n, i) => `
+    <div class="note-card fade-up" onclick="showSnackbar('📝 Opening note: ${n.title}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div class="note-title">${n.title}</div>
+        <span class="tag tag-${n.tag}" style="flex-shrink:0;margin-left:6px">${n.tag==='red'?'🚨 Urgent':n.tag==='orange'?'⚠️ Important':n.tag==='green'?'✅ Resolved':'ℹ️ Info'}</span>
+      </div>
+      <div class="note-preview">${n.content}</div>
+      <div class="note-meta"><span>✍️ ${n.author}</span><span>📅 ${n.date}</span></div>
+    </div>
+  `).join('');
+}
+
+// ===== CONTACTS =====
+function renderContacts() {
+  document.getElementById('contacts-tbody').innerHTML = contacts.map(c => `
+    <tr>
+      <td><span style="font-weight:600;color:var(--text)">${c.name}</span></td>
+      <td>${c.role}</td>
+      <td>${c.company}</td>
+      <td><a style="color:var(--blue);text-decoration:none" href="tel:${c.phone}">${c.phone}</a></td>
+      <td><a style="color:var(--blue);text-decoration:none" href="mailto:${c.email}">${c.email}</a></td>
+      <td><span class="tag tag-orange">${c.project}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ===== CALCULATOR =====
+let calcStr = '';
+let calcPrevResult = null;
+
+function calcInput(val) {
+  if (calcStr === '0' && val !== '.') calcStr = '';
+  calcStr += val;
+  document.getElementById('calc-display').textContent = calcStr || '0';
+}
+
+function calcOp(op) {
+  calcStr += op;
+  document.getElementById('calc-display').textContent = calcStr;
+}
+
+function calcEquals() {
+  try {
+    document.getElementById('calc-expr').textContent = calcStr + ' =';
+    const result = Function('"use strict"; return (' + calcStr + ')')();
+    const rounded = Math.round(result * 1e10) / 1e10;
+    document.getElementById('calc-display').textContent = rounded;
+    calcStr = String(rounded);
+  } catch(e) {
+    document.getElementById('calc-display').textContent = 'Error';
+    calcStr = '';
+  }
+}
+
+function calcClear() {
+  calcStr = '';
+  document.getElementById('calc-display').textContent = '0';
+  document.getElementById('calc-expr').textContent = '';
+}
+
+function calcBackspace() {
+  calcStr = calcStr.slice(0, -1);
+  document.getElementById('calc-display').textContent = calcStr || '0';
+}
+
+// ===== BUILD CALC =====
+const buildRates = {
+  concrete: 90, rebar: 1100, brick: 60, timber: 70, elec: 100, plumb: 300, floor: 50
+};
+
+function updateBuildCalc() {
+  const v = (id) => parseFloat(document.getElementById(id)?.value) || 0;
+  const costs = {
+    concrete: v('concrete-vol') * buildRates.concrete,
+    rebar: v('rebar-ton') * buildRates.rebar,
+    brick: v('brick-area') * buildRates.brick,
+    timber: v('timber-area') * buildRates.timber,
+    elec: v('elec-pts') * buildRates.elec,
+    plumb: v('plumb-units') * buildRates.plumb,
+    floor: v('floor-area') * buildRates.floor,
+  };
+  document.getElementById('concrete-cost').value = '£' + costs.concrete.toLocaleString();
+  document.getElementById('rebar-cost').value = '£' + costs.rebar.toLocaleString();
+  document.getElementById('brick-cost').value = '£' + costs.brick.toLocaleString();
+  document.getElementById('timber-cost').value = '£' + costs.timber.toLocaleString();
+  document.getElementById('elec-cost').value = '£' + costs.elec.toLocaleString();
+  document.getElementById('plumb-cost').value = '£' + costs.plumb.toLocaleString();
+  document.getElementById('floor-cost').value = '£' + costs.floor.toLocaleString();
+  const subtotal = Object.values(costs).reduce((a, b) => a + b, 0);
+  const total = subtotal * 1.15;
+  document.getElementById('build-total').textContent = '£' + Math.round(total).toLocaleString();
+}
+
+// ===== AGENT =====
+function toggleAgent() {
+  agentOpen = !agentOpen;
+  document.getElementById('agent-panel').classList.toggle('open', agentOpen);
+}
+
+const agentResponses = {
+  'site photo': () => { const imgs = files.filter(f=>f.type==='image'); return `Found ${imgs.length} site photos. Here are the most recent: ${imgs.slice(0,3).map(f=>f.name).join(', ')}. Go to Files & Photos to view or rotate them.`; },
+  'floor plan': () => { const fps = files.filter(f=>f.name.toLowerCase().includes('floor')||f.name.toLowerCase().includes('plan')||f.type==='dwg'); return fps.length ? `Found ${fps.length} floor plan file(s): ${fps.map(f=>f.name).join(', ')}.` : 'No floor plan files found. Try uploading from the Files section.'; },
+  'budget': () => { const total = budgetItems.reduce((a,b)=>a+b.budget,0); const spent = budgetItems.reduce((a,b)=>a+b.spent,0); return `Budget summary: Total £${total.toLocaleString()}, Spent £${spent.toLocaleString()}, Remaining £${(total-spent).toLocaleString()}. ${spent/total>0.8?'⚠️ Warning: over 80% spent!':''}`; },
+  'milestone': () => { const next = milestones.find(m=>m.status!=='done'); return next ? `Next milestone: "${next.title}" due ${next.date}. ${milestones.filter(m=>m.status==='done').length}/${milestones.length} milestones completed.` : 'All milestones complete! 🎉'; },
+  'safety': () => { const pending = checklistItems.filter(c=>!c.done&&c.category==='Safety'); return `${pending.length} safety checklist items outstanding: ${pending.map(p=>p.text).join('; ')}.`; },
+  'contact': () => { return `Team contacts: ${contacts.map(c=>`${c.name} (${c.role})`).join(', ')}.`; },
+  'pdf': () => { const pdfs = files.filter(f=>f.type==='pdf'); return `Found ${pdfs.length} PDF files: ${pdfs.map(f=>f.name).join(', ')}.`; },
+  'photo': () => agentResponses['site photo'](),
+  'image': () => agentResponses['site photo'](),
+};
+
+function agentQuery(text) {
+  document.getElementById('agent-input').value = text;
+  sendAgentMsg();
+}
+
+function sendAgentMsg() {
+  const input = document.getElementById('agent-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  // Add user message
+  appendMsg('user', text);
+
+  // Show typing
+  const typingId = 'typing-' + Date.now();
+  const msgs = document.getElementById('agent-messages');
+  msgs.innerHTML += `<div class="msg agent" id="${typingId}"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  setTimeout(() => {
+    document.getElementById(typingId)?.remove();
+    let response = `I searched the project files. `;
+    const lower = text.toLowerCase();
+    let found = false;
+    for (const [key, fn] of Object.entries(agentResponses)) {
+      if (lower.includes(key)) { response = fn(); found = true; break; }
+    }
+    if (!found) response = `I searched for "${text}" across all projects. I found ${files.filter(f=>f.name.toLowerCase().includes(lower.split(' ')[0])).length} matching files. Try asking about "site photos", "floor plans", "budget", "milestones", or "safety checklist".`;
+    appendMsg('agent', response);
+  }, 1200);
+}
+
+function appendMsg(role, text) {
+  const msgs = document.getElementById('agent-messages');
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  msgs.innerHTML += `<div class="msg ${role}">${text}<div class="msg-time">${time}</div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ===== MODALS =====
+function openNewProjectModal() {
+  document.getElementById('project-modal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+function createProject() {
+  const name = document.getElementById('new-proj-name').value.trim();
+  if (!name) { showSnackbar('❌ Please enter a project name'); return; }
+  const newP = {
+    id: Date.now(), name, type: document.getElementById('new-proj-type').value,
+    location: document.getElementById('new-proj-location').value || 'Unknown',
+    status: 'active', progress: 0, files: 0,
+    budget: '£' + (parseInt(document.getElementById('new-proj-budget').value) || 0).toLocaleString(),
+    emoji: ['🏢','🏗️','🏛️','🏭'][Math.floor(Math.random()*4)],
+    color: ['orange','blue','green'][Math.floor(Math.random()*3)]
+  };
+  projects.push(newP);
+  renderProjects();
+  renderDashboard();
+  closeModal('project-modal');
+  showSnackbar('🏗️ Project "' + name + '" created!');
+}
+
+function openNoteModal() { document.getElementById('note-modal').classList.add('open'); }
+function createNote() {
+  const title = document.getElementById('new-note-title').value.trim();
+  const content = document.getElementById('new-note-content').value.trim();
+  if (!title) { showSnackbar('❌ Please enter a title'); return; }
+  notes.unshift({ title, content: content || 'No content.', tag: document.getElementById('new-note-tag').value, date: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}), author: 'You' });
+  renderNotes();
+  closeModal('note-modal');
+  showSnackbar('📝 Note saved!');
+}
+
+// ===== SNACKBAR =====
+function showSnackbar(msg) {
+  const sb = document.getElementById('snackbar');
+  sb.textContent = msg;
+  sb.classList.add('show');
+  setTimeout(() => sb.classList.remove('show'), 2800);
+}
+
+renderChecklist();
+</script>
+</body>
+</html>
